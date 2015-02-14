@@ -258,21 +258,21 @@ main(int argc, char **argv, char **env)
     }
 
     if (verbose) {
-      cerr << " " << pf_write.block_size * pf_write.blocks_qty_actual / MiB << "MiB ";
-      cerr << "(" << pf_write.block_size * pf_write.blocks_qty_actual / MiB / pf_write.elapsed_total << " MiB/s), ";
-      cerr << pf_write.block_size * pf_write.blocks_qty_actual / MB << "MB ";
-      cerr << "(" << pf_write.block_size * pf_write.blocks_qty_actual / MB / pf_write.elapsed_total << " MB/s)" << endl;
+      cerr << " " << pf_write.block_size * pf_write.blocks_qty_actual / MiB << "MiB "
+           << "(" << pf_write.block_size * pf_write.blocks_qty_actual / MiB / pf_write.elapsed_total << " MiB/s), "
+           << pf_write.block_size * pf_write.blocks_qty_actual / MB << "MB "
+           << "(" << pf_write.block_size * pf_write.blocks_qty_actual / MB / pf_write.elapsed_total << " MB/s)" << endl;
     }
 
     if ((block_count_limit && block_count_limit == pf_write.blocks_qty_actual) || pf_write.error_count)
       break; // from outer while() loop
   }
 
-  cerr << "Wrote " << pf_write.blocks_qty_actual << " blocks of " << pf_write.block_size << " bytes (";
-  cerr << pf_write.block_size * pf_write.blocks_qty_actual / MiB << " MiB, ";
-  cerr << pf_write.block_size * pf_write.blocks_qty_actual / MB << " MB) in " << pf_write.elapsed_total << " seconds (";
-  cerr << pf_write.block_size * pf_write.blocks_qty_actual / MiB / pf_write.elapsed_total << " MiB/s, ";
-  cerr << pf_write.block_size * pf_write.blocks_qty_actual / MB / pf_write.elapsed_total << " MB/s)" << endl;
+  cerr << "Wrote " << pf_write.blocks_qty_actual << " blocks of " << pf_write.block_size << " bytes ("
+       << pf_write.block_size * pf_write.blocks_qty_actual / MiB << " MiB, "
+       << pf_write.block_size * pf_write.blocks_qty_actual / MB << " MB) in " << pf_write.elapsed_total << " seconds ("
+       << pf_write.block_size * pf_write.blocks_qty_actual / MiB / pf_write.elapsed_total << " MiB/s, "
+       << pf_write.block_size * pf_write.blocks_qty_actual / MB / pf_write.elapsed_total << " MB/s)" << endl;
 
   if (!block_count_limit && pf_write.blocks_qty_actual != pf_write.blocks_qty_claimed) {
     cerr << "Error: target size: " << pf_write.bytes_qty_claimed 
@@ -309,9 +309,9 @@ main(int argc, char **argv, char **env)
       snprintf(expected, 17, format_BLK, pf_read.blocks_qty_actual);
 
       if (memcmp(expected, &buffer[pf_read.block_size * i], 16) != 0) {
-        cerr << "Error at block " << pf_read.blocks_qty_actual << endl;
-        cerr << "Expected '" << setw(16) << expected << "'" << endl;
-        cerr << "Found    '" << setw(16) << &buffer[pf_read.block_size * i] << "'" << endl;
+        cerr << "Error at block " << pf_read.blocks_qty_actual << endl
+             << "Expected '" << setw(16) << expected << "'" << endl
+             << "Found    '" << setw(16) << &buffer[pf_read.block_size * i] << "'" << endl;
 
         ++pf_read.error_count;
         if (pf_read.error_count > 8) {
@@ -337,21 +337,21 @@ main(int argc, char **argv, char **env)
     pf_read.elapsed_max = elapsed_diff > pf_read.elapsed_max ? elapsed_diff : pf_read.elapsed_max;
 
     if (verbose) {
-      cerr << " " << pf_read.block_size * pf_read.blocks_qty_actual / MiB << "MiB ";
-      cerr << "(" << pf_read.block_size * pf_read.blocks_qty_actual / MiB / pf_read.elapsed_total << " MiB/s), ";
-      cerr << pf_read.block_size * pf_read.blocks_qty_actual / MB << "MB ";
-      cerr << "(" << pf_read.block_size * pf_read.blocks_qty_actual / MB / pf_read.elapsed_total << " MB/s)" << endl;
+      cerr << " " << pf_read.block_size * pf_read.blocks_qty_actual / MiB << "MiB "
+           << "(" << pf_read.block_size * pf_read.blocks_qty_actual / MiB / pf_read.elapsed_total << " MiB/s), "
+           << pf_read.block_size * pf_read.blocks_qty_actual / MB << "MB "
+           << "(" << pf_read.block_size * pf_read.blocks_qty_actual / MB / pf_read.elapsed_total << " MB/s)" << endl;
     }
 
     if (pf_read.blocks_qty_actual == block_count_limit || pf_read.blocks_qty_actual == pf_read.blocks_qty_claimed)
       break; // from outer while() loop
   } // while()
 
-  cerr << "Read " << pf_read.blocks_qty_actual << " blocks of " << pf_read.block_size << " bytes (";
-  cerr << pf_read.block_size * pf_read.blocks_qty_actual / MiB << " MiB, ";
-  cerr << pf_read.block_size * pf_read.blocks_qty_actual / MB << " MB) in " << pf_read.elapsed_total << " seconds (";
-  cerr << pf_read.block_size * pf_read.blocks_qty_actual / MiB / pf_read.elapsed_total << " MiB/s, ";
-  cerr << pf_read.block_size * pf_read.blocks_qty_actual / MB / pf_read.elapsed_total << " MB/s)" << endl;
+  cerr << "Read " << pf_read.blocks_qty_actual << " blocks of " << pf_read.block_size << " bytes ("
+       << pf_read.block_size * pf_read.blocks_qty_actual / MiB << " MiB, "
+       << pf_read.block_size * pf_read.blocks_qty_actual / MB << " MB) in " << pf_read.elapsed_total << " seconds ("
+       << pf_read.block_size * pf_read.blocks_qty_actual / MiB / pf_read.elapsed_total << " MiB/s, "
+       << pf_read.block_size * pf_read.blocks_qty_actual / MB / pf_read.elapsed_total << " MB/s)" << endl;
 
   cerr << (pf_read.error_count == 0 ? "Good News: no errors" : "Bad News: there were errors") << endl;
 
