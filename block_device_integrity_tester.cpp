@@ -174,7 +174,8 @@ main(int argc, char **argv, char **env)
         cerr << "Error opening " << target_file << " for writing" << endl;
         return 2;
       }
-      cerr << "Target '" << target_file << "' reports size " << pf_write.blocks_qty_claimed << " blocks, " 
+      cerr << "Target '" << target_file << "' reports size " << pf_write.blocks_qty_claimed << " blocks of "
+           << pf_write.block_size << " bytes, " 
            << (double)pf_write.bytes_qty_claimed / GiB << " GiB, " 
            << (double)pf_write.bytes_qty_claimed / GB << " GB" << endl;
     }
@@ -219,7 +220,7 @@ main(int argc, char **argv, char **env)
   clock_gettime(CLOCK_MONOTONIC, &timespec_start);
 
   while (target.good()) {
-    if (verbose) cerr << "Writing to block " << pf_write.blocks_qty_actual;
+    if (verbose) cerr << "Writing to block " << pf_write.blocks_qty_actual << ":";
     unsigned blocks_to_write = 0;
     // switch from buffer-size to 1-block writes after reaching reported target device size
     for (unsigned i = 0;
@@ -250,20 +251,14 @@ main(int argc, char **argv, char **env)
     pf_write.elapsed_max = elapsed_diff > pf_write.elapsed_max ? elapsed_diff : pf_write.elapsed_max;
 
     if (!target.good()) {
-      // correct final total if this should be end-of-device (ios::eof() doesn't get set in this case)
+      // correct final total if this should be end-of-device (ios::eof() isn't get set in this case)
       if (pf_write.blocks_qty_actual > pf_write.blocks_qty_claimed)
         --pf_write.blocks_qty_actual;
       else
         ++pf_write.error_count;
-
-      cerr << endl << (pf_write.blocks_qty_actual == pf_write.blocks_qty_claimed ? "Device end? " : "Error? ") 
-           << (target.eof()  ? " End of file reported"     : "")
-           << (target.fail() ? " Fail (Logical I/O error)" : "")
-           << (target.bad()  ? " Bad (Write I/O error)"    : "")
-           << endl;
     }
 
-    if (verbose) {
+    if (verbose && target.good()) {
       cerr << " " << pf_write.block_size * pf_write.blocks_qty_actual / MiB << "MiB "
            << pf_write.block_size * pf_write.blocks_qty_actual / MB << "MB";
       if (!skip) { cerr << " ("
@@ -273,6 +268,13 @@ main(int argc, char **argv, char **env)
       cerr << endl;
     }
 
+    if (!target.good()) {
+      cerr << endl << (pf_write.blocks_qty_actual == pf_write.blocks_qty_claimed ? "Device end? " : "Error? ") 
+           << (target.eof()  ? " End of file reported"     : "")
+           << (target.fail() ? " Fail (Logical I/O error)" : "")
+           << (target.bad()  ? " Bad (Write I/O error)"    : "")
+           << endl;
+    }
     if ((block_count_limit && block_count_limit == pf_write.blocks_qty_actual) || pf_write.error_count)
       break; // from outer while() loop
   }
@@ -319,16 +321,29 @@ main(int argc, char **argv, char **env)
   clock_gettime(CLOCK_MONOTONIC, &timespec_start);
 
   while (target.good()) {
-     if(verbose) 
-       cerr << "Reading " << buffer_size / MiB << "MiB, " 
-            << buffer_size / MB << "MB, starting at block " << pf_read.blocks_qty_actual << endl;
+    if(verbose) { 
+      cerr << "Reading " << buffer_size / MiB << "MiB, " 
+           << buffer_size / MB << "MB, starting at block " << pf_read.blocks_qty_actual << ":";
+    }
+
     target.read(buffer, buffer_size);
+
+    // track elapsed time in order to calculate device's sustained sequential read speed
+    clock_gettime(CLOCK_MONOTONIC, &timespec_now);
+    timespec_difference(&timespec_elapsed, &timespec_now, &timespec_start);
+    elapsed_last = pf_read.elapsed_total;
+    pf_read.elapsed_total = timespec_elapsed.tv_sec  + ((double)timespec_elapsed.tv_nsec / nanosecond);
+    elapsed_diff = pf_read.elapsed_total - elapsed_last;
+    pf_read.elapsed_min = elapsed_diff < pf_read.elapsed_min ? elapsed_diff : pf_read.elapsed_min;
+    pf_read.elapsed_max = elapsed_diff > pf_read.elapsed_max ? elapsed_diff : pf_read.elapsed_max;
+
     for (unsigned i = 0; i < block_qty; ++i) {
       // insert the expected unique sequential human-readable (ASCII) number into temporary buffer
       snprintf(expected, 17, format_BLK, pf_read.blocks_qty_actual);
 
       if (memcmp(expected, &buffer[pf_read.block_size * i], 16) != 0) {
-        cerr << "Error at block " << pf_read.blocks_qty_actual << endl
+        cerr << endl 
+             << "Error at block " << pf_read.blocks_qty_actual << endl
              << "Expected '" << setw(16) << expected << "'" << endl
              << "Found    '" << setw(16) << &buffer[pf_read.block_size * i] << "'" << endl;
 
@@ -345,15 +360,6 @@ main(int argc, char **argv, char **env)
       if (pf_read.blocks_qty_actual == block_count_limit || pf_read.blocks_qty_actual == pf_read.blocks_qty_claimed)
         break; // from inner for() loop
     } // for()
-
-    // track elapsed time in order to calculate device's sustained sequential read speed
-    clock_gettime(CLOCK_MONOTONIC, &timespec_now);
-    timespec_difference(&timespec_elapsed, &timespec_now, &timespec_start);
-    elapsed_last = pf_read.elapsed_total;
-    pf_read.elapsed_total = timespec_elapsed.tv_sec  + ((double)timespec_elapsed.tv_nsec / nanosecond);
-    elapsed_diff = pf_read.elapsed_total - elapsed_last;
-    pf_read.elapsed_min = elapsed_diff < pf_read.elapsed_min ? elapsed_diff : pf_read.elapsed_min;
-    pf_read.elapsed_max = elapsed_diff > pf_read.elapsed_max ? elapsed_diff : pf_read.elapsed_max;
 
     if (verbose) {
       cerr << " " << pf_read.block_size * pf_read.blocks_qty_actual / MiB << "MiB "
