@@ -26,7 +26,7 @@ Each block has its first 16 bytes written with an ASCII string of the form:
 
     BLK 000000000000
 
-With the decimal number incrementing by 1 for each new block.
+With the decimal number incrementing by 1 for each successive block.
 
     BLK 000000000001
     BLK 000000000002
@@ -55,18 +55,18 @@ Sample output in test mode:
     Licensed on the terms of the GNU General Public License version 3
     Skipping to end of device
     Target '/dev/sdb' reports size 62521344 blocks, 29.8125 GiB, 32.0109 GB
-    Source /dev/urandom
+    Source '/dev/urandom'
     Preparing data buffer with 262144 blocks of 512 bytes from Source
     Data buffer ready
-    Writing to block 62259200 30528MiB (2470.46 MiB/s), 32010MB (2590.39 MB/s)
+    Writing to block 62259200 30528MiB 32010MB
     Writing to block 62521344
     Device end?  Fail (Logical I/O error) Bad (Write I/O error)
-     30528MiB (2470.36 MiB/s), 32010MB (2590.28 MB/s)
-    Wrote 62521344 blocks of 512 bytes (30528 MiB, 32010 MB) in 12.3577 seconds (2470.36 MiB/s, 2590.28 MB/s)
+     30528MiB 32010MB
+    Wrote 62521344 blocks of 512 bytes (30528 MiB, 32010 MB, 29.8125 GiB 32.0109 GB) in 12.5639 seconds
     Reading back from /dev/sdb
     Reading 128MiB, 134MB, starting at block 62259200
-     30528MiB (2745.71 MiB/s), 32010MB (2879 MB/s)
-    Read 62521344 blocks of 512 bytes (30528 MiB, 32010 MB) in 11.1184 seconds (2745.71 MiB/s, 2879 MB/s)
+     30528MiB 32010MB
+    Read 62521344 blocks of 512 bytes (30528 MiB, 32010 MB, 29.8125 GiB 32.0109 GB) in 11.1887 seconds
     Good News: no errors
 
 Sample output when limiting testing to the first 512MiB:
@@ -78,23 +78,22 @@ Sample output when limiting testing to the first 512MiB:
     Licensed on the terms of the GNU General Public License version 3
     Limiting test to 1048576 blocks
     Target '/dev/sdb' reports size 62521344 blocks, 29.8125 GiB, 32.0109 GB
-    Source /dev/urandom
+    Source '/dev/urandom'
     Preparing data buffer with 262144 blocks of 512 bytes from Source
     Data buffer ready
-    Writing to block 0 128MiB (9.77612 MiB/s), 134MB (10.2344 MB/s)
-    Writing to block 262144 256MiB (9.77877 MiB/s), 268MB (10.2371 MB/s)
-    Writing to block 524288 384MiB (9.73661 MiB/s), 402MB (10.193 MB/s)
-    Writing to block 786432 512MiB (9.74801 MiB/s), 536MB (10.2049 MB/s)
-    Wrote 1048576 blocks of 512 bytes (512 MiB, 536 MB) in 52.5235 seconds (9.74801 MiB/s, 10.2049 MB/s)
+    Writing to block 0 128MiB 134MB (9.58176 MiB/s 10.0309 MB/s)
+    Writing to block 262144 256MiB 268MB (9.58654 MiB/s 10.0359 MB/s)
+    Writing to block 524288 384MiB 402MB (9.54898 MiB/s 9.99659 MB/s)
+    Writing to block 786432 512MiB 536MB (9.54764 MiB/s 9.99518 MB/s)
+    Wrote 1048576 blocks of 512 bytes (512 MiB, 536 MB, 0.5 GiB, 0.536871 GB) in 53.6258 seconds (9.54764 MiB/s, 9.99518 MB/s)
     Reading back from /dev/sdb
     Reading 128MiB, 134MB, starting at block 0
-     128MiB (11.5663 MiB/s), 134MB (12.1084 MB/s)
+     128MiB 134MB (11.497 MiB/s 12.0359 MB/s)
     Reading 128MiB, 134MB, starting at block 262144
-     256MiB (11.6023 MiB/s), 268MB (12.1461 MB/s)
+     256MiB 268MB (11.53 MiB/s 12.0705 MB/s)
     Reading 128MiB, 134MB, starting at block 524288
-     384MiB (11.619 MiB/s), 402MB (12.1636 MB/s)
+     384MiB 402MB (11.5577 MiB/s 12.0994 MB/s)
     Reading 128MiB, 134MB, starting at block 786432
-     512MiB (11.6317 MiB/s), 536MB (12.1769 MB/s)
-    Read 1048576 blocks of 512 bytes (512 MiB, 536 MB) in 44.0177 seconds (11.6317 MiB/s, 12.1769 MB/s)
+     512MiB 536MB (11.5618 MiB/s 12.1037 MB/s)
+    Read 1048576 blocks of 512 bytes (512 MiB, 536 MB, 0.5 GiB, 0.536871 GB) in 44.2839 seconds (11.5618 MiB/s, 12.1037 MB/s)
     Good News: no errors
-

@@ -186,7 +186,7 @@ main(int argc, char **argv, char **env)
     target.close();
     return 3;
   }
-  cerr << "Source " << urandom << endl;
+  cerr << "Source '" << urandom << "'"  << endl;
 
   unsigned buffer_size = block_qty * pf_write.block_size;
   char* buffer = new char[buffer_size];
@@ -250,9 +250,12 @@ main(int argc, char **argv, char **env)
     pf_write.elapsed_max = elapsed_diff > pf_write.elapsed_max ? elapsed_diff : pf_write.elapsed_max;
 
     if (!target.good()) {
-      ++pf_write.error_count;
+      // correct final total if this should be end-of-device (ios::eof() doesn't get set in this case)
       if (pf_write.blocks_qty_actual > pf_write.blocks_qty_claimed)
         --pf_write.blocks_qty_actual;
+      else
+        ++pf_write.error_count;
+
       cerr << endl << (pf_write.blocks_qty_actual == pf_write.blocks_qty_claimed ? "Device end? " : "Error? ") 
            << (target.eof()  ? " End of file reported"     : "")
            << (target.fail() ? " Fail (Logical I/O error)" : "")
@@ -262,9 +265,12 @@ main(int argc, char **argv, char **env)
 
     if (verbose) {
       cerr << " " << pf_write.block_size * pf_write.blocks_qty_actual / MiB << "MiB "
-           << "(" << pf_write.block_size * pf_write.blocks_qty_actual / MiB / pf_write.elapsed_total << " MiB/s), "
-           << pf_write.block_size * pf_write.blocks_qty_actual / MB << "MB "
-           << "(" << pf_write.block_size * pf_write.blocks_qty_actual / MB / pf_write.elapsed_total << " MB/s)" << endl;
+           << pf_write.block_size * pf_write.blocks_qty_actual / MB << "MB";
+      if (!skip) { cerr << " ("
+           << pf_write.block_size * pf_write.blocks_qty_actual / MiB / pf_write.elapsed_total << " MiB/s "
+           << pf_write.block_size * pf_write.blocks_qty_actual / MB / pf_write.elapsed_total << " MB/s)";
+      }
+      cerr << endl;
     }
 
     if ((block_count_limit && block_count_limit == pf_write.blocks_qty_actual) || pf_write.error_count)
@@ -273,13 +279,23 @@ main(int argc, char **argv, char **env)
 
   cerr << "Wrote " << pf_write.blocks_qty_actual << " blocks of " << pf_write.block_size << " bytes ("
        << pf_write.block_size * pf_write.blocks_qty_actual / MiB << " MiB, "
-       << pf_write.block_size * pf_write.blocks_qty_actual / MB << " MB) in " << pf_write.elapsed_total << " seconds ("
+       << pf_write.block_size * pf_write.blocks_qty_actual / MB << " MB, " 
+       << (double)pf_write.block_size * pf_write.blocks_qty_actual / GiB << " GiB, "
+       << (double)pf_write.block_size * pf_write.blocks_qty_actual / GB << " GB"
+       << ") in " << pf_write.elapsed_total << " seconds";
+  if (!skip) { cerr << " ("
        << pf_write.block_size * pf_write.blocks_qty_actual / MiB / pf_write.elapsed_total << " MiB/s, "
-       << pf_write.block_size * pf_write.blocks_qty_actual / MB / pf_write.elapsed_total << " MB/s)" << endl;
+       << pf_write.block_size * pf_write.blocks_qty_actual / MB / pf_write.elapsed_total << " MB/s)";
+  }
+  cerr << endl;
+
+  if (pf_write.error_count) {
+    cerr << "There were " << pf_write.error_count << " write errors" << endl;
+  }
 
   if (!block_count_limit && pf_write.blocks_qty_actual != pf_write.blocks_qty_claimed) {
-    cerr << "Error: target size: " << pf_write.bytes_qty_claimed 
-         << ", wrote " << pf_write.block_size * pf_write.blocks_qty_actual << " bytes" << endl;
+    cerr << "Error: target claims size: " << pf_write.bytes_qty_claimed 
+         << ", but wrote " << pf_write.block_size * pf_write.blocks_qty_actual << " bytes" << endl;
   }
 
   target.close();
@@ -341,9 +357,12 @@ main(int argc, char **argv, char **env)
 
     if (verbose) {
       cerr << " " << pf_read.block_size * pf_read.blocks_qty_actual / MiB << "MiB "
-           << "(" << pf_read.block_size * pf_read.blocks_qty_actual / MiB / pf_read.elapsed_total << " MiB/s), "
-           << pf_read.block_size * pf_read.blocks_qty_actual / MB << "MB "
-           << "(" << pf_read.block_size * pf_read.blocks_qty_actual / MB / pf_read.elapsed_total << " MB/s)" << endl;
+           << pf_read.block_size * pf_read.blocks_qty_actual / MB << "MB";
+      if (!skip) { cerr << " ("
+           << pf_read.block_size * pf_read.blocks_qty_actual / MiB / pf_read.elapsed_total << " MiB/s "
+           << pf_read.block_size * pf_read.blocks_qty_actual / MB / pf_read.elapsed_total << " MB/s)";
+      }
+      cerr << endl;
     }
 
     if (pf_read.blocks_qty_actual == block_count_limit || pf_read.blocks_qty_actual == pf_read.blocks_qty_claimed)
@@ -352,17 +371,23 @@ main(int argc, char **argv, char **env)
 
   cerr << "Read " << pf_read.blocks_qty_actual << " blocks of " << pf_read.block_size << " bytes ("
        << pf_read.block_size * pf_read.blocks_qty_actual / MiB << " MiB, "
-       << pf_read.block_size * pf_read.blocks_qty_actual / MB << " MB) in " << pf_read.elapsed_total << " seconds ("
+       << pf_read.block_size * pf_read.blocks_qty_actual / MB << " MB, "
+       << (double)pf_read.block_size * pf_read.blocks_qty_actual / GiB << " GiB, "
+       << (double)pf_read.block_size * pf_read.blocks_qty_actual / GB << " GB"
+       << ") in " << pf_read.elapsed_total << " seconds";
+  if (!skip) { cerr << " ("
        << pf_read.block_size * pf_read.blocks_qty_actual / MiB / pf_read.elapsed_total << " MiB/s, "
-       << pf_read.block_size * pf_read.blocks_qty_actual / MB / pf_read.elapsed_total << " MB/s)" << endl;
-
-  cerr << (pf_read.error_count == 0 ? "Good News: no errors" : "Bad News: there were errors") << endl;
+       << pf_read.block_size * pf_read.blocks_qty_actual / MB / pf_read.elapsed_total << " MB/s)";
+  }
+  cerr << endl;
 
   if (!block_count_limit && pf_read.blocks_qty_actual != pf_read.blocks_qty_claimed) {
-    cerr << "Error: target size: " << pf_read.bytes_qty_claimed 
-         << ", read " << pf_read.block_size * pf_read.blocks_qty_actual << "bytes" << endl;
+    cerr << "Error: target claims size: " << pf_read.bytes_qty_claimed 
+         << ", but read " << pf_read.block_size * pf_read.blocks_qty_actual << "bytes" << endl;
   }
   target.close();
+
+  cerr << (pf_write.error_count || pf_read.error_count ? "Bad News: there were errors" : "Good News: no errors") << endl;
 
   if (buffer) {
     delete[] buffer;
