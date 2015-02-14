@@ -59,7 +59,10 @@ bool verbose = false;
 
 void usage(char *prog_name)
 {
-  cerr << endl << "Usage: " << prog_name << " [" << switch_verbose << "] [" << switch_limit << " blocks] DEVICE_NAME" << endl
+  cerr << endl << "Usage: " << prog_name << " [" 
+       << switch_verbose << "] [" 
+       << switch_limit << " blocks] ["
+       << switch_skip << "] DEVICE_NAME" << endl
        << switch_verbose << ": be very verbose" << endl
        << switch_limit << " blocks: maximum number of blocks (sectors) to test" << endl
        << switch_skip << ": program test option which only writes to the last 128MiB" << endl
