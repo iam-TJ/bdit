@@ -1,6 +1,6 @@
 # bdit - Block Device Integrity Tester
 
-A simple tool to a determine the true capacity and read/write speeds of flash devices.
+A simple tool to determine the true capacity and read/write speeds of flash devices.
 
     $ ./bdit
     Block Device Integrity Tester
