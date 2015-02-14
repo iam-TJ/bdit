@@ -37,7 +37,7 @@ struct Performance {
   double elapsed_max;
   double elapsed_avg;
 
-  Performance() : blocks_qty_claimed(0), blocks_qty_actual(0), block_size(512), error_count(0),
+  Performance() : bytes_qty_claimed(0), blocks_qty_claimed(0), blocks_qty_actual(0), block_size(512), error_count(0),
                    elapsed_total(0), elapsed_min(0), elapsed_max(0), elapsed_avg(0) {}
 };
 
