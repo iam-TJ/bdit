@@ -8,7 +8,7 @@ A simple tool to determine the true capacity and read/write speeds of flash devi
     Copyright 2015 TJ <hacker@iam.tj>
     Licensed on the terms of the GNU General Public License version 3
 
-    Usage: ./bdit [--verbose] [--limit blocks] DEVICE_NAME
+    Usage: ./bdit [--verbose] [--limit blocks] [--skip] DEVICE_NAME
     --verbose: be very verbose
     --limit blocks: maximum number of blocks (sectors) to test
     --skip: program test option which only writes to the last 128MiB
